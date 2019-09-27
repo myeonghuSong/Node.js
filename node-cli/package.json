@@ -9,6 +9,6 @@
   "author": "madSong",
   "license": "MIT",
   "bin": {
-    "cli": "./index.js"
+    "cli": "./template.js"
   }
 }
