@@ -73,11 +73,24 @@ const makeTemplate = (type, name, directory) => {
     }
 };
 
+const copyFile = (name, directory) => {
+    if(exist(name)) {
+        
+        (directory);
+        fs.copyFileSync(name, path.join(directory, name));
+        console.log(`${name} 파일이 복사되었습니다.`);
+    } else {
+        console.error('파일이 존재하지 않습니다.');
+    }
+}
+
 let triggered = false;
 
 program
     .version('0.0.1', '-v, --version')
     .usage('[options]')
+
+program
     .command('template <type>')
     .usage('--name <name> --path [path]')
     .description('템플릿을 생성합니다.')
@@ -86,6 +99,15 @@ program
     .option('-d, --directory [path]', '생성 경로를 입력하세요.', '.')
     .action((type, options) => {
         makeTemplate(type, options.name, options.directory);
+        triggered = true;
+    })
+
+program
+    .command('copy <name> <directory>')
+    .usage('<name> <directory>')
+    .description('파일을 복사합니다.')
+    .action((name, directory) => {
+        copyFile(name, directory);
         triggered = true;
     })
 
