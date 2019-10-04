@@ -9,7 +9,8 @@
   "author": "madSong",
   "license": "MIT",
   "bin": {
-    "cli": "./command.js"
+    "cli": "./command.js",
+    "wlt": "./wallet.js"
   },
   "dependencies": {
     "chalk": "^2.4.2",
