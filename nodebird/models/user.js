@@ -13,7 +13,7 @@ module.exports = ((sequelize, DataTypes) => (
         type: DataTypes.STRING(100),
         allowNull: true,
     }, provider: {
-        type: DataTypes(10),
+        type: DataTypes.STRING(10),
         allowNull: false,
         defaultValue: 'local',
     },
