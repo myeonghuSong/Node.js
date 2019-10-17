@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 
 const { Post, Hashtag, User } = require ('../models');
+const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
@@ -19,13 +20,13 @@ const upload = multer({
     limit: { fileSize: 5 * 1024 * 1024},
 });
 
-router.post('/img', upload.single('img'), (req, res) => {
+router.post('/img', isLoggedIn, upload.single('img'), (req, res) => {
     console.log(req.body, req.file);
     res.json({ url: `/img/${req.file.filename}` });
 });
 
 const upload2 = multer();
-router.post('/', upload2.none(), async (req, res, next) => {
+router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
     try {
         const post = await Post.create({
             content: req.body.content,
@@ -52,10 +53,10 @@ router.get('/hashtag', async (req, res, next) => {
         return res.redirect('/');
     } 
     try {
-        const hashtag = await Hashtag.find({ where: { title: query }});
+        const hashtag = await Hashtag.findOne({ where: { title: query }});
         let posts = [];
         if(hashtag) {
-            post = await hashtag.getPosts({ include: [{ model: User }]});
+            posts = await hashtag.getPosts({ include: [{ model: User }]});
         }
         return res.render('main', {
             title: `${query} | NodeBird`,
