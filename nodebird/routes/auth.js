@@ -36,7 +36,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => { // req.body.email, re
         }
         if(!user) {
             req.flash('loginError', info.message);
-            return req.redirect('/');
+            return res.redirect('/');
         }
         return req.login(user, (loginError) =>{
             if(loginError) {
@@ -44,15 +44,23 @@ router.post('/login', isNotLoggedIn, (req, res, next) => { // req.body.email, re
                 return next(loginError);
             }
             return res.redirect('/');
-        })
+        });
     })(req, res, next);
 });
 
 //GET /auth/logout
-router.get('/logout', isLoggedIn, (req, res, next) => {
+router.get('/logout', isLoggedIn, (req, res) => {
     req.logout();
     req.session.destroy();
     res.redirect('/');
 })
+
+router.get('/kakao', passport.authenticate('kakao'));
+
+router.get('/kakao/callback', passport.authenticate('kakao', {
+    failureRedirect: '/',
+}), (req, res) => {
+    res.redirect('/');
+});
 
 module.exports = router;
