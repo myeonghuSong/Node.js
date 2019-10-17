@@ -17,7 +17,6 @@ module.exports = (passport) => {
             if(exUser) {
                 done(null, exUser);
             } else {
-                console.log('시발', profile);
                 const newUser = await User.create({
                     email: profile._json.kakao_account.email,
                     nick: profile._json.properties.nickname,
