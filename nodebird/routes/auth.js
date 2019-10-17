@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/join', isNotLoggedIn, async (req, res, next) => {
     const { email, nick , password } = req.body;
     try {
-        const exUser = await User.find({ where: { email }});
+        const exUser = await User.findOne({ where: { email }});
         if(exUser){
             req.flash('joinError', '이미 가입된 아이디입니다.');
             return res.redirect('/join');
@@ -23,7 +23,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
         return res.redirect('/');
     } catch(error){
         console.error(error);
-        next(error);
+        return next(error);
     }
 });
 
@@ -45,7 +45,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => { // req.body.email, re
             }
             return res.redirect('/');
         })
-    })
+    })(req, res, next);
 });
 
 //GET /auth/logout

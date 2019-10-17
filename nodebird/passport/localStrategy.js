@@ -1,7 +1,7 @@
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 
-const { User } = require('./models');
+const { User } = require('../models');
 
 module.exports = (passport) => {
     passport.use(new LocalStrategy({
@@ -9,7 +9,7 @@ module.exports = (passport) => {
         passwordField: 'password', //req.body.password
     }, async (email, password, done) => { //done(에러, 성공, 실패)
         try {
-            const exUser = await User.find({ where: {email} });
+            const exUser = await User.findOne({ where: {email} });
             if(exUser) {
                 //비밀번호 검사
                 const result = await bcrypt.compare(password, exUser.password);
