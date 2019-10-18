@@ -11,6 +11,8 @@ require('dotenv').config();
 const indexRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
+const postRouter = require('./routes/post');
+
 const { sequelize } = require('./models');
 const passportConfig = require('./passport');
 
@@ -24,6 +26,7 @@ app.set('port', process.env.PORT || 8001);
 
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/img', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser('nodebirdSecret'));
@@ -42,6 +45,8 @@ app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
+app.use('/post', postRouter);
+app.use('/user', userRouter);
 
 app.use((req,res,next) => {
     const err = new Error('Not Found');

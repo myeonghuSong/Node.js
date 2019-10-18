@@ -2,6 +2,8 @@ const express = require('express');
 const router = express();
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
+const { Post, User } = require('../models');
+
 router.get('/profile', isLoggedIn, (req, res) => {
     res.render('profile', {title: '내 정보 - NodeBird', user: req.user});
 });
@@ -15,12 +17,28 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 })
 
 router.get('/', (req, res, next) => {
-    res.render('main', {
-        title: 'NodeBird',
-        twits: [],
-        user: req.user,
-        loginError: req.flash('loginError')
+    Post.findAll({
+        include: [{
+            model: User,
+            attributes: ['id','nick'],
+        }, {
+            model: User,
+            attributes: ['id','nick'],
+            as: 'Liker',
+        }],
     })
+        .then((posts) => {
+            res.render('main', {
+                title: 'NodeBird',
+                twits: posts,
+                user: req.user,
+                loginError: req.flash('loginError')
+            });
+        })
+        .catch((error) => {
+            console.error(error);
+            next(error);
+        });
 });
 
 module.exports = router;
