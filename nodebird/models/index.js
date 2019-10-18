@@ -21,7 +21,7 @@ db.User.belongsToMany(db.User, {through: 'Follow', as: 'Followers', foreignKey: 
 db.User.belongsToMany(db.User, {through: 'Follow', as: 'Followings', foreignKey: 'followerId'});
 
 db.User.belongsToMany(db.Post, {through: 'Like'});
-db.Post.belongsToMany(db.User, {through: 'Like'});
+db.Post.belongsToMany(db.User, {through: 'Like', as: 'Liker'});
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
