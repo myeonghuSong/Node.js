@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const { verifyToken } = require('./middlewares');
 const { Domain, User, Post, Hashtag } = require('../models');
 
@@ -7,7 +8,7 @@ const router = express.Router();
 router.post('/token', async (req, res) => {
     const { clientSecret } = req.body;
     try {
-        const domain = await Domain.find({
+        const domain = await Domain.findOne({
             where: { clientSecret },
             include: {
                 model: User,
@@ -33,12 +34,16 @@ router.post('/token', async (req, res) => {
             token,
         });
     } catch (error) {
+        console.error(error);
         return res.status(500).json({
             code: 500,
             message: '서버 에러',
         });
-
     }
-})
+});
+
+router.get('/test', verifyToken, (req, res) => {
+    res.json(req.decoded);
+});
 
 module.exports = router;
