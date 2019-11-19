@@ -3,6 +3,7 @@ const router = express.Router();
 const uuidv4 = require('uuid/v4');
 const { User, Domain } = require('../models');
 router.get('/', (req, res, next) => {
+   
     User.findOne({
         where: { id: req.user && req.user.id || null},
         include: { model: Domain },
