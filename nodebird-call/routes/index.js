@@ -70,4 +70,15 @@ router.get('/search/:hashtag', async (req, res, next) => {
     }
 });
 
+router.get('/follow', async (req, res, next) => {
+    try {
+        const result = await request(req, '/follow');
+        res.json(result.data);
+    } catch (error) {
+        if(error.code){
+            console.error(error);
+            next(error);
+        }
+    }
+})
 module.exports = router;
