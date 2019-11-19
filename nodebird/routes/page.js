@@ -17,6 +17,8 @@ router.get('/join', isNotLoggedIn, (req, res) => {
 })
 
 router.get('/', (req, res, next) => {
+
+    console.log('노드버드 새로고침', req.session)
     Post.findAll({
         include: [{
             model: User,

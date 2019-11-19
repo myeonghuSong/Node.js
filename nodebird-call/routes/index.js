@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/test', async (req, res, next) => {
     try {
         if(!req.session.jwt) {
-            const tokenResult = await axios.post('http://localhost:8002/v1/token',{
+            const tokenResult = await axios.post('http://localhost:8002/v2/token',{
                 clientSecret: process.env.CLIENT_SECRET,
             });
             if(tokenResult.data && tokenResult.data.code === 200){
@@ -15,9 +15,10 @@ router.get('/test', async (req, res, next) => {
                 return res.json(tokenResult.data);
             }
         }
-        const result = await axios.get('http://localhost:8002/v1/test', {
+        const result = await axios.get('http://localhost:8002/v2/test', {
             headers: { authorization: req.session.jwt },
         });
+
         return res.json(result.data);
     } catch(error) {
         console.error(error);
@@ -31,12 +32,12 @@ router.get('/test', async (req, res, next) => {
 const request = async (req, api) => {
     try {
         if(!req.session.jwt) {
-            const tokenResult = await axios.post('http://localhost:8002/v1/token', {
+            const tokenResult = await axios.post('http://localhost:8002/v2/token', {
                 clientSecret: process.env.CLIENT_SECRET,
             });
             req.session.jwt = tokenResult.data.token;
         }
-        return await axios.get(`http://localhost:8002/v1/${api}`, {
+        return await axios.get(`http://localhost:8002/v2/${api}`, {
             headers: { authorization: req.session.jwt },
         });
     } catch (error) {
