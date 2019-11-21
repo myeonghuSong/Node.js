@@ -3,49 +3,52 @@ const axios = require('axios');
 
 const router = express.Router();
 
-router.get('/test', async (req, res, next) => {
-    try {
-        if(!req.session.jwt) {
-            const tokenResult = await axios.post('http://localhost:8002/v2/token',{
-                clientSecret: process.env.CLIENT_SECRET,
-            });
-            if(tokenResult.data && tokenResult.data.code === 200){
-                req.session.jwt = tokenResult.data.token;
-            } else {
-                return res.json(tokenResult.data);
-            }
-        }
-        const result = await axios.get('http://localhost:8002/v2/test', {
-            headers: { authorization: req.session.jwt },
-        });
+const URL = 'http://localhost:8002/v2';
+axios.defaults.headers.origin = 'http://localhost:8003';
+// router.get('/test', async (req, res, next) => {
+//     try {
+//         if(!req.session.jwt) {
+//             const tokenResult = await axios.post('http://localhost:8002/v2/token',{
+//                 clientSecret: process.env.CLIENT_SECRET,
+//             });
+//             if(tokenResult.data && tokenResult.data.code === 200){
+//                 req.session.jwt = tokenResult.data.token;
+//             } else {
+//                 return res.json(tokenResult.data);
+//             }
+//         }
+//         const result = await axios.get('http://localhost:8002/v2/test', {
+//             headers: { authorization: req.session.jwt },
+//         });
 
-        return res.json(result.data);
-    } catch(error) {
-        console.error(error);
-        if( error.response.status === 419 ) {
-            return res.json(error.response.data);
-        }
-        return next(error);
-    }
-});
+//         return res.json(result.data);
+//     } catch(error) {
+//         console.error(error);
+//         if( error.response.status === 419 ) {
+//             return res.json(error.response.data);
+//         }
+//         return next(error);
+//     }
+// });
 
 const request = async (req, api) => {
     try {
         if(!req.session.jwt) {
-            const tokenResult = await axios.post('http://localhost:8002/v2/token', {
+            const tokenResult = await axios.post(`${URL}/token`, {
                 clientSecret: process.env.CLIENT_SECRET,
             });
             req.session.jwt = tokenResult.data.token;
         }
-        return await axios.get(`http://localhost:8002/v2/${api}`, {
+        return await axios.get(`${URL}/${api}`, {
             headers: { authorization: req.session.jwt },
         });
     } catch (error) {
         console.error(error);
-        if (error.response.status < 500) {
-            return error.response;
+        if (error.response.status === 419) {
+            delete req.session.jwt;
+            return request(req, api);
         }
-        throw error;
+        return error.response;
     }
 };
 
@@ -84,7 +87,7 @@ router.get('/follow', async (req, res, next) => {
 })
 
 router.get('/', (req, res) => {
-    res.render('main', { key: process.env.CLIENT_SECRET });
+    res.render('main', { key: process.env.FRONT_SECRET });
 });
 
 module.exports = router;

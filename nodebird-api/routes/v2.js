@@ -15,32 +15,49 @@ router.use( async (req, res, next) => {
     if(domain) {
         cors({ origin: req.get('origin') })(req, res, next);
     } else {
-        console.log('test')
         next();
     }
 });
 
 router.use( async (req,res,next) => {
-    const domain = await Domain.findOne({
-        where: { host: url.parse(req.get('origin')).host}
-    });
-    if( domain.type === 'premium') {
-        premiumApiLimiter(req, res, next);
-    } else {
-        apiLimiter(req, res, next);
+    try{
+        const domain = await Domain.findOne({
+            where: { host: url.parse(req.get('origin')).host}
+        });
+        if( domain.type === 'premium') {
+            premiumApiLimiter(req, res, next);
+        } else {
+            apiLimiter(req, res, next);
+        }
+    }
+    catch (error) {
+        console.error(error);
+        next(error);
     }
 });
 
 router.post('/token', async (req, res) => {
-    const { clientSecret } = req.body;
+    const { frontSecret ,clientSecret } = req.body;
     try {
-        const domain = await Domain.findOne({
-            where: { clientSecret },
+        let domain;
+        if(frontSecret === undefined){
+            domain = await Domain.findOne({
+                where: { clientSecret },
+                include: {
+                    model: User,
+                    attribute: ['nick', 'id'],
+                },
+            });        
+        } else if (clientSecret === undefined ) {
+            domain = await Domain.findOne({
+            where: { frontSecret },
             include: {
-                model: User,
-                attribute: ['nick', 'id'],
-            },
-        });
+                    model: User,
+                    attribute: ['nick', 'id'],
+                },
+            });
+        }
+        
         if(!domain) {
             return res.status(401).json({
                 code: 401,
