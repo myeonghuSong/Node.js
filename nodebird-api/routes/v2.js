@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const url = require('url');
 
-const { verifyToken, apiLimiter } = require('./middlewares');
+const { verifyToken, apiLimiter, premiumApiLimiter } = require('./middlewares');
 const { Domain, User, Post, Hashtag } = require('../models');
 const router = express.Router();
 
@@ -18,8 +18,20 @@ router.use( async (req, res, next) => {
         console.log('test')
         next();
     }
-})
-router.post('/token', apiLimiter, async (req, res) => {
+});
+
+router.use( async (req,res,next) => {
+    const domain = await Domain.findOne({
+        where: { host: url.parse(req.get('origin')).host}
+    });
+    if( domain.type === 'premium') {
+        premiumApiLimiter(req, res, next);
+    } else {
+        apiLimiter(req, res, next);
+    }
+});
+
+router.post('/token', async (req, res) => {
     const { clientSecret } = req.body;
     try {
         const domain = await Domain.findOne({
@@ -56,11 +68,11 @@ router.post('/token', apiLimiter, async (req, res) => {
     }
 });
 
-router.get('/test', apiLimiter, verifyToken, (req, res) => {
+router.get('/test', verifyToken, (req, res) => {
     res.json(req.decoded);
 });
 
-router.get('/posts/my', apiLimiter, verifyToken, (req, res) => {
+router.get('/posts/my', verifyToken, (req, res) => {
     Post.findAll({ where: { userId: req.decoded.id } })
         .then((posts) => {
             console.log(posts);
@@ -78,7 +90,7 @@ router.get('/posts/my', apiLimiter, verifyToken, (req, res) => {
         })
 });
 
-router.get('/posts/hashtag/:title', apiLimiter, verifyToken, async (req, res) => {
+router.get('/posts/hashtag/:title', verifyToken, async (req, res) => {
     try {
         const hashtag = await Hashtag.findOne({ where: { title: req.params.title }})
         if(!hashtag) {
@@ -101,7 +113,7 @@ router.get('/posts/hashtag/:title', apiLimiter, verifyToken, async (req, res) =>
     }
 });
 
-router.get('/follow', apiLimiter, verifyToken, async (req, res) => {
+router.get('/follow', verifyToken, async (req, res) => {
     try {
         const user = await User.findOne({ where: { id: req.decoded.id } });
         const follower = await user.getFollowers({ attributes: ['id','nick'] });
